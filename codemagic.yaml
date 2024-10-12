@@ -4,25 +4,27 @@ workflows:
     environment:
       vars:
         UNITY_VERSION: 2022.3.31f1
-      xcode: latest # Установите версию Xcode для iOS
+      xcode: latest  # Указываем, что сборка будет проходить на macOS с последней версией Xcode
     scripts:
       - name: Install Unity
         script: |
-          curl -o unity.pkg https://download.unity3d.com/download_unity/$(UNITY_VERSION)/MacEditorInstaller/Unity.pkg
+          curl -o unity.pkg https://download.unity3d.com/download_unity/${UNITY_VERSION}/MacEditorInstaller/Unity.pkg
           sudo installer -pkg unity.pkg -target /
       - name: Build iOS App
         script: |
-          /Applications/Unity/Hub/Editor/$(UNITY_VERSION)/Unity.app/Contents/MacOS/Unity \
-            -batchmode -quit -projectPath . -executeMethod BuildScript.BuildIOS \
+          UNITY_PATH="/Applications/Unity/Hub/Editor/${UNITY_VERSION}/Unity.app/Contents/MacOS/Unity"
+          $UNITY_PATH -batchmode -quit -projectPath . -executeMethod BuildScript.BuildIOS \
             -buildTarget ios -customBuildPath build/ios
       - name: Export Xcode Project
         script: |
-          cd build/ios && xcodebuild -workspace <ProjectName>.xcworkspace \
+          mkdir -p build/ios
+          cd build/ios
+          xcodebuild -project <ProjectName>.xcodeproj \
             -scheme <SchemeName> -configuration Release \
-            -archivePath build/ios/App.xcarchive archive
+            -archivePath App.xcarchive archive
     artifacts:
       - build/ios/App.xcarchive
-      - build/ios/App.ipa # Перенос .ipa сюда
+      - build/ios/App.ipa
 
     publishing:
       scripts:
