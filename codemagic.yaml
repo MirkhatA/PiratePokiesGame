@@ -3,7 +3,7 @@ workflows:
     name: Build Unity iOS App
     environment:
       vars:
-        UNITY_VERSION: 2022.3.31f1 
+        UNITY_VERSION: 2022.3.31f1
       xcode: latest # Установите версию Xcode для iOS
     scripts:
       - name: Install Unity
@@ -22,6 +22,7 @@ workflows:
             -archivePath build/ios/App.xcarchive archive
     artifacts:
       - build/ios/App.xcarchive
+      - build/ios/App.ipa # Перенос .ipa сюда
 
     publishing:
       scripts:
@@ -31,5 +32,3 @@ workflows:
               -archivePath build/ios/App.xcarchive \
               -exportOptionsPlist ExportOptions.plist \
               -exportPath build/ios/App.ipa
-      artifacts:
-        - build/ios/App.ipa
