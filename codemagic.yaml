@@ -1,0 +1,35 @@
+workflows:
+  unity-ios:
+    name: Build Unity iOS App
+    environment:
+      vars:
+        UNITY_VERSION: 2022.3.31f1 
+      xcode: latest # Установите версию Xcode для iOS
+    scripts:
+      - name: Install Unity
+        script: |
+          curl -o unity.pkg https://download.unity3d.com/download_unity/$(UNITY_VERSION)/MacEditorInstaller/Unity.pkg
+          sudo installer -pkg unity.pkg -target /
+      - name: Build iOS App
+        script: |
+          /Applications/Unity/Hub/Editor/$(UNITY_VERSION)/Unity.app/Contents/MacOS/Unity \
+            -batchmode -quit -projectPath . -executeMethod BuildScript.BuildIOS \
+            -buildTarget ios -customBuildPath build/ios
+      - name: Export Xcode Project
+        script: |
+          cd build/ios && xcodebuild -workspace <ProjectName>.xcworkspace \
+            -scheme <SchemeName> -configuration Release \
+            -archivePath build/ios/App.xcarchive archive
+    artifacts:
+      - build/ios/App.xcarchive
+
+    publishing:
+      scripts:
+        - name: Export .ipa
+          script: |
+            xcodebuild -exportArchive \
+              -archivePath build/ios/App.xcarchive \
+              -exportOptionsPlist ExportOptions.plist \
+              -exportPath build/ios/App.ipa
+      artifacts:
+        - build/ios/App.ipa
